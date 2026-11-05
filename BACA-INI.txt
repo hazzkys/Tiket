@@ -1,0 +1,5 @@
+Taruh foto kamar di folder ini dengan nama persis:
+  standar.jpg
+  deluxe.jpg
+  keluarga.jpg
+  suite.jpg
