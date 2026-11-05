@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b2239">
+<link rel="manifest" href="manifest-resepsionis.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Resepsionis – Hotel Bahari Inn</title>
+<style>
+:root{--ink:#0b2239;--muted:#5b6b7c;--bg:#eef2f5;--card:#fff;--line:#dbe2e9;--teal:#0e8a8a;--gold:#d9a441;--red:#c0392b;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+aside{width:220px;background:var(--ink);color:#cfe3f0;padding:20px 12px;flex-shrink:0}
+aside h1{font-size:1.1rem;color:#fff;margin:0 0 4px}aside p{font-size:.8rem;margin:0 0 20px}
+aside button{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:inherit;padding:10px 12px;border-radius:8px;font:inherit;cursor:pointer;text-align:left}
+aside button.on,aside button:hover{background:#17375a;color:#fff}
+.dot{background:var(--red);color:#fff;border-radius:999px;font-size:.75rem;padding:0 7px;display:none}
+section.tab{display:none}section.tab.on{display:block}
+main{flex:1;padding:20px;min-width:0}h2{margin:0 0 14px}
+@media(max-width:700px){body{flex-direction:column}aside{width:100%;display:flex;gap:6px;flex-wrap:wrap;align-items:center}aside p{display:none}aside h1{margin:0 8px 0 0}aside button{width:auto}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}.stat b{font-size:1.8rem;display:block}.stat span{color:var(--muted);font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.card.new{border-color:var(--gold);box-shadow:0 0 0 3px #d9a44144}
+.sub{color:var(--muted);font-size:.9rem}
+button.b{font:inherit;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;background:var(--teal);color:#fff}
+button.b.red{background:var(--red)}button.b.alt{background:#fff;color:var(--ink);border:2px solid var(--ink)}
+.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.st{padding:2px 10px;border-radius:999px;font-size:.82rem;font-weight:700}
+.Menunggu{background:#fff1cf;color:#7a5200}.Dikonfirmasi{background:#d9f3e2;color:#14532d}.Ditolak{background:#fde0e0;color:#8a1c1c}.Selesai{background:#e3e8ee;color:#34445a}
+.modal{position:fixed;inset:0;background:#0b223999;display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal.on{display:flex}.box{background:#fff;border-radius:14px;padding:22px;max-width:440px;width:100%}
+.call{text-align:center}.call .av{font-size:3.2rem;animation:ring 0.6s infinite alternate}
+@keyframes ring{to{transform:rotate(-14deg)}}@media(prefers-reduced-motion:reduce){.call .av{animation:none}}
+.toast{position:fixed;top:16px;right:16px;background:var(--gold);color:var(--ink);font-weight:700;padding:12px 18px;border-radius:10px;display:none;z-index:30;box-shadow:0 6px 20px #0003}
+dl{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;margin:0}dt{color:var(--muted)}dd{margin:0}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<aside><h1>Resepsionis</h1><p>Hotel Bahari Inn</p>
+<button data-t="dash" class="on">Ringkasan</button>
+<button data-t="book">Pesanan <span class="dot" id="dB">0</span></button>
+<button data-t="call">Panggilan <span class="dot" id="dC">0</span></button>
+<button data-t="guest">Profil tamu</button>
+<button id="snd" style="margin-top:16px;font-size:.85rem">🔔 Aktifkan suara &amp; notifikasi</button></aside>
+
+<main>
+<section class="tab on" id="t-dash"><h2>Ringkasan hari ini</h2><div class="stats" id="stats"></div>
+<h3>Pesanan terbaru</h3><div id="recent"></div></section>
+<section class="tab" id="t-book"><h2>Semua pesanan</h2><div id="books"></div></section>
+<section class="tab" id="t-call"><h2>Riwayat panggilan</h2><div id="calls"></div></section>
+<section class="tab" id="t-guest"><h2>Profil tamu</h2><div id="guests"></div></section>
+</main>
+
+<div class="modal" id="mCall"><div class="box call"><div class="av">📞</div><h3 id="cn">Panggilan masuk</h3><p class="sub" id="cp"></p><div id="ct" style="font-size:1.3rem;font-weight:800"></div>
+<div class="acts" style="justify-content:center;margin-top:14px" id="cb"></div></div></div>
+<div class="modal" id="mProf"><div class="box"><h3>Profil pemesan</h3><dl id="pd"></dl><div class="acts" style="margin-top:16px"><button class="b alt" onclick="mProf.classList.remove('on')">Tutup</button></div></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="sync.js"></script>
+<script>
+const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const rp=n=>"Rp "+n.toLocaleString("id-ID"),jam=t=>new Date(t).toLocaleString("id-ID",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
+let seenB=null,seenC=new Set(),actCall=null,ringTimer=null,unreadB=0,ctx=null;
+
+document.querySelectorAll("aside [data-t]").forEach(b=>b.onclick=()=>{document.querySelectorAll("aside [data-t]").forEach(x=>x.classList.toggle("on",x===b));document.querySelectorAll("section.tab").forEach(s=>s.classList.toggle("on",s.id==="t-"+b.dataset.t));if(b.dataset.t==="book"){unreadB=0;render()}});
+$("snd").onclick=()=>{try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();ctx.resume();beep(1)}catch(e){}if("Notification"in window)Notification.requestPermission();$("snd").textContent="🔔 Suara & notifikasi aktif"};
+function beep(n=2){if(!ctx)return;for(let i=0;i<n;i++){const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=880;o.connect(g);g.connect(ctx.destination);const t=ctx.currentTime+i*.3;g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.start(t);o.stop(t+.25)}}
+function toast(t){const e=$("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",5000)}
+function notify(t,body){toast(t);beep(2);document.title="🔔 "+t;setTimeout(()=>document.title="Resepsionis – Hotel Bahari Inn",6000);try{if("Notification"in window&&Notification.permission==="granted")new Notification(t,{body})}catch(e){}}
+
+function setStatus(id,s){const d=load(),b=d.b.find(x=>x.id===id);if(b){b.status=s;save(d);render()}}
+window.setStatus=setStatus;
+function showProf(id){const d=load(),b=d.b.find(x=>x.id===id),g=b.guest,n=d.b.filter(x=>x.guest.phone===g.phone).length;
+ $("pd").innerHTML=`<dt>Nama</dt><dd>${esc(g.name)}</dd><dt>No. HP</dt><dd>${esc(g.phone)}</dd><dt>Email</dt><dd>${esc(g.email||"-")}</dd><dt>No. identitas</dt><dd>${esc(g.idn||"-")}</dd><dt>Permintaan</dt><dd>${esc(g.note||"-")}</dd><dt>Total pesanan</dt><dd>${n} kali</dd>`;$("mProf").classList.add("on")}
+window.showProf=showProf;
+
+function bookCard(b,isNew){const a=b.status==="Menunggu"?`<button class="b" onclick="setStatus('${b.id}','Dikonfirmasi')">Konfirmasi</button><button class="b red" onclick="setStatus('${b.id}','Ditolak')">Tolak</button>`:b.status==="Dikonfirmasi"?`<button class="b" onclick="setStatus('${b.id}','Selesai')">Check-out selesai</button>`:"";
+ return `<div class="card ${isNew?"new":""}"><div><b>${esc(b.roomName)}</b> · ${b.id}<br><span class="sub">${esc(b.guest.name)} · ${esc(b.guest.phone)}<br>${b.cin} → ${b.cout} (${b.n} malam, ${b.g} tamu) · dipesan ${jam(b.t)}</span></div>
+ <div class="acts"><span class="st ${b.status}">${b.status}</span><b>${rp(b.total)}</b><button class="b alt" onclick="showProf('${b.id}')">Profil</button>${a}</div></div>`}
+
+function render(){const d=load(),bs=[...d.b].reverse(),p=d.b.filter(b=>b.status==="Menunggu").length,k=d.b.filter(b=>b.status==="Dikonfirmasi").length;
+ const omzet=d.b.filter(b=>b.status==="Dikonfirmasi"||b.status==="Selesai").reduce((s,b)=>s+b.total,0);
+ $("stats").innerHTML=`<div class="stat"><b>${p}</b><span>Menunggu konfirmasi</span></div><div class="stat"><b>${k}</b><span>Dikonfirmasi</span></div><div class="stat"><b>${d.c.length}</b><span>Panggilan</span></div><div class="stat"><b>${rp(omzet)}</b><span>Pendapatan terkonfirmasi</span></div>`;
+ const empty='<span class="sub">Belum ada data.</span>';
+ $("recent").innerHTML=bs.slice(0,3).map(b=>bookCard(b,b.status==="Menunggu")).join("")||empty;
+ $("books").innerHTML=bs.map(b=>bookCard(b,b.status==="Menunggu")).join("")||empty;
+ $("calls").innerHTML=[...d.c].reverse().map(c=>`<div class="card"><div><b>${esc(c.name)}</b><br><span class="sub">${esc(c.phone)} · ${jam(c.t)}</span></div><span class="st ${c.status==="answered"||c.status==="ended"&&c.ans?"Dikonfirmasi":c.status==="rejected"?"Ditolak":"Menunggu"}">${c.ans?"Diangkat"+(c.end?" ("+Math.round((c.end-c.ans)/1000)+" dtk)":""):c.status==="rejected"?"Ditolak":c.status==="ringing"?"Berdering":"Tak terjawab"}</span></div>`).join("")||empty;
+ const gm={};d.b.forEach(b=>{(gm[b.guest.phone]=gm[b.guest.phone]||{g:b.guest,n:0,t:0,id:b.id});gm[b.guest.phone].n++;gm[b.guest.phone].t+=b.total;gm[b.guest.phone].id=b.id});
+ $("guests").innerHTML=Object.values(gm).map(x=>`<div class="card"><div><b>${esc(x.g.name)}</b><br><span class="sub">${esc(x.g.phone)} · ${esc(x.g.email||"tanpa email")}</span></div><div class="acts"><span>${x.n} pesanan · ${rp(x.t)}</span><button class="b alt" onclick="showProf('${x.id}')">Lihat profil</button></div></div>`).join("")||empty;
+ const dB=$("dB");dB.textContent=unreadB;dB.style.display=unreadB?"inline":"none";
+ const rc=d.c.filter(c=>c.status==="ringing").length,dC=$("dC");dC.textContent=rc;dC.style.display=rc?"inline":"none"}
+
+function checkNew(){const d=load();
+ if(seenB===null){seenB=new Set(d.b.map(b=>b.id));d.c.forEach(c=>seenC.add(c.id))}
+ d.b.forEach(b=>{if(!seenB.has(b.id)){seenB.add(b.id);unreadB++;notify("Pesanan baru: "+b.roomName,`${b.guest.name} · ${b.cin} → ${b.cout} · ${rp(b.total)}`)}});
+ d.c.forEach(c=>{if(c.status==="ringing"&&!seenC.has(c.id)){seenC.add(c.id);incoming(c)}});
+ if(actCall){const c=d.c.find(x=>x.id===actCall);if(!c||c.status==="ended"||c.status==="rejected"){closeCall()}else if(c.status==="ringing"){$("ct").textContent="Berdering…"}else{const s=Math.floor((Date.now()-c.ans)/1000);$("ct").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}}}
+function incoming(c){actCall=c.id;$("cn").textContent=c.name;$("cp").textContent="Panggilan masuk · "+c.phone;$("ct").textContent="Berdering…";
+ $("cb").innerHTML=`<button class="b" id="ya">Angkat</button><button class="b red" id="no">Tolak</button>`;$("mCall").classList.add("on");
+ clearInterval(ringTimer);beep(2);ringTimer=setInterval(()=>beep(2),2500);
+ $("ya").onclick=()=>{upd(c.id,x=>{x.status="answered";x.ans=Date.now()});clearInterval(ringTimer);$("cb").innerHTML=`<button class="b red" id="end">Akhiri</button>`;$("end").onclick=()=>{upd(c.id,x=>{x.status="ended";x.end=Date.now()});closeCall()}};
+ $("no").onclick=()=>{upd(c.id,x=>x.status="rejected");closeCall()}}
+function upd(id,f){const d=load(),c=d.c.find(x=>x.id===id);if(c){f(c);save(d)}render()}
+function closeCall(){clearInterval(ringTimer);actCall=null;$("mCall").classList.remove("on");render()}
+
+function tick(){checkNew();render()}
+startSync(tick);
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>

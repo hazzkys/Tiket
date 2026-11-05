@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b2239">
+<link rel="manifest" href="manifest-tamu.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Hotel Bahari Inn – Pesan Kamar</title>
+<style>
+:root{--ink:#0b2239;--muted:#5b6b7c;--bg:#f4f6f8;--card:#fff;--line:#dbe2e9;--teal:#0e8a8a;--gold:#d9a441;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);line-height:1.5}
+nav{position:sticky;top:0;z-index:5;background:var(--ink);color:#fff;display:flex;align-items:center;gap:16px;padding:12px 20px;flex-wrap:wrap}
+nav b{font-size:1.2rem;margin-right:auto}nav a{color:#cfe3f0;text-decoration:none;font-size:.95rem}nav a:hover{color:#fff}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--teal);color:#fff;border:0;padding:10px 18px;border-radius:8px;font-weight:700}
+.btn.alt{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+.btn.gold{background:var(--gold);color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.hero{background:linear-gradient(120deg,#0b2239,#0e6d78);color:#fff;padding:56px 20px}
+.hero div{max-width:1000px;margin:auto}.hero h1{font-size:clamp(2rem,6vw,3.2rem);margin:0 0 8px;letter-spacing:-.02em}
+.hero p{max-width:50ch;color:#d3e6ee;margin:0 0 20px}
+main{max-width:1000px;margin:auto;padding:8px 16px 60px}
+h2{font-size:1.6rem;margin:40px 0 4px}.sub{color:var(--muted);margin:0 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.room{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.room img{width:100%;aspect-ratio:3/2;object-fit:cover;display:block;background:#dde6ec}
+.room .b{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.room h3{margin:0}.price{font-size:1.3rem;font-weight:800;color:var(--teal)}.price small{font-weight:400;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:#eaf1f5;border-radius:999px;padding:2px 10px;font-size:.82rem}
+.left{font-size:.85rem;color:var(--muted)}.room .btn{margin-top:auto}
+.fac{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.fac span{font-size:1.8rem}.fac h3{margin:4px 0}.fac p{margin:0;color:var(--muted);font-size:.93rem}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+label{display:block;font-weight:600;font-size:.9rem;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.two{grid-template-columns:1fr}}
+.bk{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--line)}
+.st{padding:2px 10px;border-radius:999px;font-size:.82rem;font-weight:700}
+.Menunggu{background:#fff1cf;color:#7a5200}.Dikonfirmasi{background:#d9f3e2;color:#14532d}.Ditolak{background:#fde0e0;color:#8a1c1c}.Selesai{background:#e3e8ee;color:#34445a}
+.modal{position:fixed;inset:0;background:#0b223999;display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal.on{display:flex}.modal .box{background:#fff;border-radius:14px;padding:22px;max-width:480px;width:100%;max-height:92vh;overflow:auto}
+.modal h3{margin-top:0}.row{display:flex;gap:10px;margin-top:16px}.row>*{flex:1}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:10px;display:none;z-index:30}
+.call{text-align:center}.call .av{font-size:3rem}.call .t{font-size:1.4rem;font-weight:800}
+.total{font-size:1.2rem;font-weight:800;margin-top:12px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<nav><b>Hotel Bahari Inn</b><a href="#kamar">Kamar</a><a href="#fasilitas">Fasilitas</a><a href="#profil">Profil saya</a><a href="#pesanan">Pesanan saya</a>
+<button class="btn gold" id="callBtn">Telepon resepsionis</button></nav>
+
+<section class="hero"><div><h1>Menginap nyaman, harga bersahabat</h1>
+<p>Pilih kamar, isi tanggal, dan resepsionis kami langsung menerima pesananmu secara real-time.</p>
+<a href="#kamar"><button class="btn gold">Lihat kamar</button></a></div></section>
+
+<main>
+<h2 id="kamar">Pilihan kamar</h2><p class="sub">Harga per malam, sudah termasuk sarapan.</p>
+<div class="grid" id="rooms"></div>
+
+<h2 id="fasilitas">Fasilitas hotel</h2><p class="sub">Semua tamu bisa memakai fasilitas ini tanpa biaya tambahan, kecuali disebutkan lain.</p>
+<div class="grid" id="facs"></div>
+
+<h2 id="profil">Profil pemesan</h2><p class="sub">Disimpan di perangkat ini, jadi tidak perlu isi ulang saat memesan lagi.</p>
+<div class="panel"><div class="two">
+<div><label for="pn">Nama lengkap</label><input id="pn"></div>
+<div><label for="pp">No. HP / WhatsApp</label><input id="pp" inputmode="tel"></div>
+<div><label for="pe">Email</label><input id="pe" type="email"></div>
+<div><label for="pi">No. KTP / identitas</label><input id="pi"></div></div>
+<label for="pc">Permintaan khusus (opsional)</label><input id="pc" placeholder="Contoh: lantai atas, kasur tambahan">
+<div class="row"><button class="btn" id="saveProf">Simpan profil</button><span></span></div></div>
+
+<h2 id="pesanan">Pesanan saya</h2><p class="sub">Status diperbarui otomatis saat resepsionis memproses pesananmu.</p>
+<div class="panel" id="mine"></div>
+</main>
+
+<div class="modal" id="mBook"><div class="box"><h3 id="bt">Pesan kamar</h3>
+<div class="two"><div><label for="bi">Check-in</label><input type="date" id="bi"></div><div><label for="bo">Check-out</label><input type="date" id="bo"></div></div>
+<div class="two"><div><label for="bg">Jumlah tamu</label><input type="number" id="bg" min="1" value="1"></div><div><label for="bs">Tipe kamar</label><select id="bs"></select></div></div>
+<p class="sub" id="bwho"></p><div class="total" id="btot"></div>
+<div class="row"><button class="btn alt" id="bx">Batal</button><button class="btn" id="bok">Kirim pesanan</button></div></div></div>
+
+<div class="modal" id="mCall"><div class="box call"><div class="av">📞</div><h3>Resepsionis</h3><div class="t" id="cst">Memanggil…</div><p class="sub" id="cmsg"></p>
+<button class="btn alt" id="cend">Akhiri</button></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="sync.js"></script>
+<script>
+const ROOMS=[
+ {id:"std",name:"Kamar Standar",price:250000,cap:2,bed:"1 kasur double",size:"18 m²",stock:6,color:"#9fc3d4",f:["AC","TV","Kamar mandi dalam"],img:"foto/standar.jpg"},
+ {id:"dlx",name:"Kamar Deluxe",price:380000,cap:2,bed:"1 kasur king",size:"24 m²",stock:4,color:"#a8cdb9",f:["AC","Smart TV","Balkon","Water heater"],img:"foto/deluxe.jpg"},
+ {id:"fam",name:"Kamar Keluarga",price:520000,cap:4,bed:"2 kasur queen",size:"34 m²",stock:3,color:"#d8c19b",f:["AC","Smart TV","Sofa","Kulkas mini"],img:"foto/keluarga.jpg"},
+ {id:"sui",name:"Suite Bahari",price:750000,cap:3,bed:"1 kasur king + sofa bed",size:"48 m²",stock:2,color:"#c4aed0",f:["Ruang tamu","Bathtub","Pemandangan kolam","Mesin kopi"],img:"foto/suite.jpg"}];
+const FACS=[["📶","WiFi cepat","Gratis di seluruh area hotel, kecepatan stabil untuk kerja dan streaming."],["🍳","Sarapan prasmanan","Setiap pagi pukul 06.30–10.00, menu lokal dan western."],["🏊","Kolam renang","Buka 07.00–20.00, tersedia handuk dan kursi santai."],["🅿️","Parkir luas","Gratis untuk mobil dan motor, dijaga 24 jam."],["🛎️","Resepsionis 24 jam","Bantuan check-in kapan saja, termasuk telepon dari web ini."],["🚐","Antar-jemput","Layanan ke stasiun atau bandara, reservasi lewat resepsionis."],["🧺","Laundry","Layanan cuci dan setrika, selesai dalam 24 jam (berbayar)."],["❄️","AC & air hangat","Tersedia di semua tipe kamar."]];
+const PK="hotel_profile_v1";
+const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const rp=n=>"Rp "+n.toLocaleString("id-ID");
+const prof=()=>{try{return JSON.parse(localStorage.getItem(PK))||{}}catch(e){return{}}};
+const art=c=>"data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 260'><rect width='400' height='260' fill='${c}'/><rect x='40' y='30' width='90' height='80' fill='#e6f3f8'/><rect x='60' y='140' width='280' height='70' rx='8' fill='#fff'/><rect x='60' y='118' width='280' height='34' rx='8' fill='#e8eef3'/><rect x='80' y='126' width='60' height='20' rx='6' fill='#fff'/><rect x='50' y='212' width='300' height='10' fill='#0002'/><text x='200' y='245' font-size='12' text-anchor='middle' fill='#0b2239'>Taruh foto asli di folder foto/</text></svg>`);
+function toast(t){const e=$("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",3500)}
+const left=(r,d)=>r.stock-d.b.filter(b=>b.room===r.id&&(b.status==="Menunggu"||b.status==="Dikonfirmasi")).length;
+
+function renderRooms(){const d=load();$("rooms").innerHTML=ROOMS.map(r=>{const l=left(r,d);return `<article class="room"><img src="${r.img}" alt="${r.name}" onerror="this.onerror=null;this.src=art('${r.color}')">
+<div class="b"><h3>${r.name}</h3><div class="price">${rp(r.price)} <small>/ malam</small></div>
+<div class="left">${r.bed} · ${r.size} · maks ${r.cap} tamu</div><div class="chips">${r.f.map(x=>`<span class="chip">${x}</span>`).join("")}</div>
+<div class="left">${l>0?"Sisa "+l+" kamar":"Penuh"}</div><button class="btn" data-r="${r.id}" ${l<=0?"disabled":""}>Pesan kamar ini</button></div></article>`}).join("");
+ document.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>openBook(b.dataset.r))}
+$("facs").innerHTML=FACS.map(f=>`<div class="fac"><span>${f[0]}</span><h3>${f[1]}</h3><p>${f[2]}</p></div>`).join("");
+$("bs").innerHTML=ROOMS.map(r=>`<option value="${r.id}">${r.name} – ${rp(r.price)}</option>`).join("");
+
+function loadProf(){const p=prof();$("pn").value=p.name||"";$("pp").value=p.phone||"";$("pe").value=p.email||"";$("pi").value=p.idn||"";$("pc").value=p.note||""}
+function curProf(){return{name:$("pn").value.trim(),phone:$("pp").value.trim(),email:$("pe").value.trim(),idn:$("pi").value.trim(),note:$("pc").value.trim()}}
+$("saveProf").onclick=()=>{const p=curProf();if(!p.name||!p.phone)return toast("Nama dan No. HP wajib diisi");localStorage.setItem(PK,JSON.stringify(p));toast("Profil tersimpan");renderMine()};
+
+const day=86400000,iso=t=>new Date(t).toISOString().slice(0,10);
+function nights(){const a=new Date($("bi").value),b=new Date($("bo").value);return Math.round((b-a)/day)}
+function calc(){const r=ROOMS.find(x=>x.id===$("bs").value),n=nights();$("btot").textContent=n>0?`${n} malam × ${rp(r.price)} = ${rp(n*r.price)}`:"Pilih tanggal check-in dan check-out";const p=curProf();$("bwho").textContent=p.name?`Atas nama ${p.name} (${p.phone})`:"Lengkapi profil pemesan di bagian Profil saya"}
+function openBook(id){$("bs").value=id;$("bi").min=iso(Date.now());$("bi").value=iso(Date.now());$("bo").value=iso(Date.now()+day);$("mBook").classList.add("on");calc()}
+["bi","bo","bs","bg"].forEach(i=>$(i).onchange=calc);$("bx").onclick=()=>$("mBook").classList.remove("on");
+$("bok").onclick=()=>{const p=curProf(),r=ROOMS.find(x=>x.id===$("bs").value),n=nights(),g=+$("bg").value;
+ if(!p.name||!p.phone)return toast("Isi nama dan No. HP di Profil saya dulu");
+ if(n<1)return toast("Tanggal check-out harus setelah check-in");
+ if(g>r.cap)return toast(`Kamar ini maksimal ${r.cap} tamu`);
+ const d=load();if(left(r,d)<=0)return toast("Kamar sudah penuh");
+ localStorage.setItem(PK,JSON.stringify(p));
+ const b={id:"BK"+Math.random().toString(36).slice(2,7).toUpperCase(),room:r.id,roomName:r.name,cin:$("bi").value,cout:$("bo").value,n,g,total:n*r.price,guest:p,status:"Menunggu",t:Date.now()};
+ d.b.push(b);save(d);$("mBook").classList.remove("on");toast("Pesanan terkirim! Kode: "+b.id);renderAll()};
+
+function renderMine(){const p=prof(),d=load(),m=d.b.filter(b=>p.phone&&b.guest.phone===p.phone).reverse();
+ $("mine").innerHTML=m.length?m.map(b=>`<div class="bk"><div><b>${b.roomName}</b> · ${b.id}<br><span class="sub">${b.cin} → ${b.cout} (${b.n} malam, ${b.g} tamu)</span></div><div><div class="st ${b.status}">${b.status}</div><b>${rp(b.total)}</b></div></div>`).join(""):'<span class="sub">Belum ada pesanan untuk profil ini.</span>'}
+function renderAll(){renderRooms();renderMine()}
+
+// Panggilan ke resepsionis
+let callId=null,tick=null;
+$("callBtn").onclick=()=>{const p=prof(),d=load();callId="CL"+Date.now();d.c.push({id:callId,name:p.name||"Tamu web",phone:p.phone||"-",status:"ringing",t:Date.now()});save(d);$("mCall").classList.add("on");syncCall()};
+$("cend").onclick=()=>{const d=load(),c=d.c.find(x=>x.id===callId);if(c&&c.status!=="ended"&&c.status!=="rejected"){c.status="ended";c.end=Date.now();save(d)}$("mCall").classList.remove("on");callId=null};
+function syncCall(){if(!callId)return;const c=load().c.find(x=>x.id===callId);if(!c)return;
+ if(c.status==="ringing"){$("cst").textContent="Memanggil…";$("cmsg").textContent="Menunggu resepsionis mengangkat"}
+ else if(c.status==="answered"){const s=Math.floor((Date.now()-c.ans)/1000);$("cst").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");$("cmsg").textContent="Tersambung dengan resepsionis"}
+ else if(c.status==="rejected"){$("cst").textContent="Tidak tersedia";$("cmsg").textContent="Resepsionis sedang sibuk, coba lagi sebentar."}
+ else{$("cst").textContent="Panggilan selesai";$("cmsg").textContent=""}}
+function refresh(){renderAll();syncCall()}
+loadProf();renderAll();startSync(refresh);
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
